@@ -1,0 +1,205 @@
+# ==========================================================================
+# gensys .gitignore — safety-first: keep private/secret files off the remote
+# ==========================================================================
+
+# --------------------------------------------------------------------------
+# Secrets & credentials  (MOST IMPORTANT — never commit these)
+# --------------------------------------------------------------------------
+# Environment / dotenv files
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+*.env
+
+# Generic secret files
+secrets.*
+*secret*
+*secrets*
+credentials
+credentials.*
+*.cred
+*.credentials
+auth.json
+.netrc
+.htpasswd
+
+# SSH / GPG / keys / certificates
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+*.pem
+*.key
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+*.ppk
+*.asc
+*.gpg
+*.pgp
+.ssh/
+known_hosts
+
+# Cloud / infra provider credentials
+.aws/
+.azure/
+.gcloud/
+gcloud-*.json
+service-account*.json
+*-service-account.json
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraformrc
+terraform.rc
+.vault-token
+kubeconfig
+*.kubeconfig
+.kube/config
+
+# Tokens / API keys dropped as files
+*.token
+.token
+apikey
+apikey.*
+*.apikey
+
+# --------------------------------------------------------------------------
+# Backups, dumps & archives  (may contain data or secrets)
+# --------------------------------------------------------------------------
+*.bak
+*.backup
+*.old
+*.orig
+*.swp.bak
+*.dump
+*.sql
+*.sqlite
+*.sqlite3
+*.db
+*.dump.gz
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.gz
+*.7z
+*.rar
+
+# --------------------------------------------------------------------------
+# Logs & runtime
+# --------------------------------------------------------------------------
+*.log
+logs/
+*.pid
+*.seed
+*.pid.lock
+
+# --------------------------------------------------------------------------
+# OS-generated files
+# --------------------------------------------------------------------------
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+.AppleDouble
+.LSOverride
+Icon?
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+.directory
+.fuse_hidden*
+.nfs*
+
+# --------------------------------------------------------------------------
+# Editors & IDEs
+# --------------------------------------------------------------------------
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.iml
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+*.swp
+*.swo
+*~
+.\#*
+\#*\#
+
+# --------------------------------------------------------------------------
+# Temp / scratch
+# --------------------------------------------------------------------------
+tmp/
+temp/
+.tmp/
+.cache/
+*.tmp
+scratch/
+scratchpad/
+
+# --------------------------------------------------------------------------
+# Language / tooling artifacts (kept broad for a mixed repo)
+# --------------------------------------------------------------------------
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.npm/
+.yarn/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.python-version
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Rust
+target/
+
+# Go
+/bin/
+
+# Build output (common names)
+dist/
+build/
+out/
+
+# --------------------------------------------------------------------------
+# Local / personal overrides — put private stuff here and it stays local
+# --------------------------------------------------------------------------
+*.local
+*.private
+local/
+private/
+.local/
+secrets/
