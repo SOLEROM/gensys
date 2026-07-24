@@ -1,2 +1,0 @@
-# gensys
-genAi SysAdmin
