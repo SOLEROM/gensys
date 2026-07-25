@@ -22,6 +22,8 @@ Reproduce the Regolith 3 desktop environment with the author's customizations:
 - **Wallpaper** + lockscreen image.
 - **X session env** (`.xprofile`): NVIDIA GL tuning, HSL-mouse accel profile,
   cursor theme/size.
+- **Input sources**: English + Hebrew (`us`/`il` xkb layouts), toggled with
+  `Alt+Z`.
 
 This layer reproduces **Regolith**, not vanilla i3 — the custom config is a thin
 `config.d/` overlay on top of Regolith's shipped i3 config.
@@ -151,6 +153,12 @@ sed "s|{{WALLPAPER}}|$WALLPAPER|g" Xresources > ~/.config/regolith3/Xresources
 # 4. apply
 regolith-look refresh         # reload Xresources (wallpaper, cursor)
 # reload i3 in-session: Win+Shift+c   (or log out/in to re-run .xprofile)
+
+# 5. input sources — English + Hebrew, toggled with Alt+Z (must run inside
+# the graphical session — gsettings needs the session dbus/dconf; no-op
+# over a bare SSH shell with no session bus)
+gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('xkb', 'il')]"
+gsettings set org.gnome.desktop.wm.keybindings switch-input-source "['<Alt>z']"
 ```
 
 ### What `myConfs` does
@@ -167,6 +175,16 @@ bindsym Ctrl+Escape mode "disable-Fx-modes"
 The `disable-Fx-modes` mode exists so the `F1`–`F10` workspace bindings can be
 temporarily suspended (e.g. when an app needs the function keys); `Ctrl+Escape`
 enters it, `Ctrl+Escape` again returns to default.
+
+### Input sources (English/Hebrew, Alt+Z)
+
+Applied via `gsettings` against the `org.gnome.desktop.input-sources` /
+`org.gnome.desktop.wm.keybindings` schemas — Regolith's Flashback session
+runs the standard GNOME settings daemon (`gsd-keyboard`) underneath, which
+is what actually applies the xkb layout live and reacts to the schema
+change with no re-login needed. `switch-input-source-backward` is left at
+its GNOME default (`<Shift><Alt><Super>BackSpace`) — only the forward
+toggle was rebound.
 
 ### Status-bar tweaks (i3xrocks)
 
@@ -213,6 +231,8 @@ pgrep -a picom                   # NVIDIA boxes: picom with the user config
 xrdb -query | grep -i wallpaper  # wallpaper path resolved
 xrdb -query | grep action.time   # → zenity --calendar
 ls ~/.config/regolith3/i3xrocks/conf.d/   # all packaged blocklets + our 30_net-traffic
+gsettings get org.gnome.desktop.input-sources sources          # → [('xkb', 'us'), ('xkb', 'il')]
+gsettings get org.gnome.desktop.wm.keybindings switch-input-source  # → ['<Alt>z']
 ```
 
 Functionally: press `F1`–`F10` (workspaces switch), `Win+Insert` (new workspace
@@ -286,5 +306,9 @@ Snapshots captured from:
 from `/data/sysadmin/ubu20/00RegolithI3/barChanges/wifiName.md`. If a
 Regolith upgrade reworks the packaged script, re-base the copy on the new
 version and re-apply the one marked delta.
+
+Input sources (English/Hebrew, Alt+Z toggle) — added 2026-07-25 on the
+rebuilt ubu24 host via GNOME Settings, confirmed live and captured back
+into this layer the same day.
 
 Re-sync the others by re-copying from those paths.

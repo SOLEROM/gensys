@@ -39,10 +39,28 @@ fi
 
 sudo add-apt-repository -y ppa:deadsnakes/ppa
 
+# Mozilla Team PPA — noble's own `firefox` apt package is Canonical's
+# transitional snap-redirector, not a real deb (confirmed 2026-07-25). Pin
+# so `apt-get install firefox` later in this script gets the PPA's real deb.
+sudo add-apt-repository -y ppa:mozillateam/ppa
+if [ ! -f /etc/apt/preferences.d/mozilla-firefox ]; then
+  printf 'Package: *\nPin: release o=LP-PPA-mozillateam\nPin-Priority: 1001\n\nPackage: firefox*\nPin: version 1:1snap*\nPin-Priority: -1\n' \
+    | sudo tee /etc/apt/preferences.d/mozilla-firefox >/dev/null
+fi
+
 if [ ! -f /etc/apt/sources.list.d/syncthing.list ]; then
   curl -fsSL https://syncthing.net/release-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/syncthing-archive-keyring.gpg
   echo "deb [signed-by=/usr/share/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net syncthing stable" \
     | sudo tee /etc/apt/sources.list.d/syncthing.list >/dev/null
+fi
+
+# HashiCorp (vagrant) — dropped from Ubuntu's own archives on noble (no
+# installation candidate as of this repo's noble baseline), so it needs
+# HashiCorp's own apt repo like docker/tailscale above.
+if [ ! -f /etc/apt/sources.list.d/hashicorp.list ]; then
+  curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+  echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(. /etc/os-release && echo $VERSION_CODENAME) main" \
+    | sudo tee /etc/apt/sources.list.d/hashicorp.list >/dev/null
 fi
 
 sudo apt-get update
@@ -53,7 +71,7 @@ sudo apt-get install -y \
   plocate ripgrep fd-find nnn cscope \
   curl wget rsync build-essential gnupg ca-certificates \
   software-properties-common net-tools nmap sqlite3 \
-  pandoc ffmpeg imagemagick graphviz gh yamllint yt-dlp
+  pandoc ffmpeg imagemagick graphviz gh yamllint yt-dlp python3-pip python3.12-venv
 sudo updatedb   # prime plocate's index so `locate` works right away
 
 echo "==> debug/monitoring + extra CLI tools (absorbed from the former 15-toolset)"
@@ -123,8 +141,26 @@ sudo apt-get install -y \
   cmake autoconf automake libtool \
   openjdk-17-jdk openjdk-21-jdk \
   nodejs npm \
-  qemu-kvm libvirt-daemon-system virtinst virt-manager vagrant virtualbox
+  qemu-kvm libvirt-daemon-system virtinst virt-manager vagrant
 # (lxd has no apt package on noble — the snap below is the one install)
+
+# VirtualBox — noble's own multiverse package (7.0.16) fails to build its
+# vboxdrv kernel module on newer kernels (modpost: undefined kvm_enable_
+# virtualization/kvm_disable_virtualization/cr4_* symbols — those kernels
+# export kvm-amd/kvm-intel namespaced symbols vboxdrv 7.0.16 doesn't import;
+# fixed upstream only in VirtualBox 7.0.20+/7.1+, which noble doesn't ship).
+# Confirmed failing 2026-07-25 on kernel 7.0.0-28-generic. Install Oracle's
+# own current .deb instead (same vendor-package pattern as Chrome/Discord/
+# Obsidian above) — do NOT `apt-get install virtualbox` on noble.
+if ! command -v virtualbox >/dev/null 2>&1; then
+  VBOX_VER=$(curl -fsSL https://download.virtualbox.org/virtualbox/LATEST.TXT)
+  VBOX_DEB=$(curl -fsSL "https://download.virtualbox.org/virtualbox/${VBOX_VER}/" \
+    | grep -oE 'href="[^"]+noble[^"]*amd64\.deb"' | head -1 | sed 's/^href="//;s/"$//')
+  curl -fL "https://download.virtualbox.org/virtualbox/${VBOX_VER}/${VBOX_DEB}" -o /tmp/virtualbox.deb
+  sudo apt-get install -y /tmp/virtualbox.deb
+  rm -f /tmp/virtualbox.deb
+  sudo usermod -aG vboxusers "$(id -un)"
+fi
 
 echo "==> jupyter (apt family — same channel as the source station)"
 sudo apt-get install -y jupyter-notebook jupyter-server python3-ipykernel

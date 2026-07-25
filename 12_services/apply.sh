@@ -100,7 +100,8 @@ else
     # errored in the UI until the mount/bind is applied, the honest state.
     if [ ! -d "$FPATH" ]; then
       if [ -d "$(dirname "$FPATH")" ]; then
-        mkdir -p "$FPATH"
+        mkdir -p "$FPATH" 2>/dev/null || \
+          echo "    WARNING: could not create $FPATH (permission denied — root-owned parent?) — adding the folder anyway; it shows an error in the UI until it's created by hand (e.g. sudo mkdir -p + chown)" >&2
       else
         echo "    WARNING: parent of $FPATH doesn't exist (missing mount/bind?) — adding the folder anyway; it shows an error in the UI until the path exists" >&2
       fi

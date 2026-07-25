@@ -62,6 +62,18 @@ sudo cryptsetup luksOpen "/dev/disk/by-uuid/$LUKS_UUID" crypto_data
 When `storage.data_encrypted: "no"`, skip this entire step — `apply.sh`
 does, and never installs cryptsetup either.
 
+**Already-unlocked case (confirmed 2026-07-25, myDevX1 reinstall)**: a
+same-disk reinstall's autoinstall/curtin config can arrive having already
+unlocked and mapped `/data` itself, under whatever mapper name it chose
+(e.g. `data`, not this layer's `crypto_data`) — with its own crypttab/fstab
+lines already in place. `apply.sh` detects this by checking whether
+`storage.data_uuid` is already visible as a block device (mapper name
+doesn't matter) and skips the crypttab/`luksOpen`/fstab-append steps
+entirely in that case — writing a second crypttab line for the same LUKS
+UUID would prompt for the passphrase twice at every boot for no benefit,
+since the mount step below only cares about the filesystem UUID being
+reachable, not which mapper name exposed it.
+
 > **Wrong-config guard**: `apply.sh` refuses to write a single crypttab/
 > fstab line unless `/dev/disk/by-uuid/<UUID>` actually exists on this
 > machine. This catches the "forgot to set `GENSYS_CONFIG`, silently fell

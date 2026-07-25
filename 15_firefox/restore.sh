@@ -9,17 +9,31 @@ set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SRC="$HERE/bookmarks"
-FF_DIR="$HOME/.mozilla/firefox"
+
+# Profile location depends on the Firefox build: pre-XDG releases (and snap
+# packaging) use ~/.mozilla/firefox; Firefox adopted the XDG Base Directory
+# spec for profile storage in later releases, moving it to
+# ~/.config/mozilla/firefox — confirmed on this station 2026-07-25 running
+# deb Firefox 153.0 from ppa:mozillateam/ppa. Pick whichever actually has a
+# profile.
+FF_DIR=""
+for candidate in "$HOME/.config/mozilla/firefox" "$HOME/.mozilla/firefox"; do
+  if [ -d "$candidate" ] && ls "$candidate"/*/places.sqlite >/dev/null 2>&1; then
+    FF_DIR="$candidate"
+    break
+  fi
+done
 
 if [ ! -d "$SRC" ] || [ -z "$(ls -A "$SRC" 2>/dev/null)" ]; then
   echo "no $SRC — run backup.sh on the old station first, and carry this repo's 15_firefox/bookmarks/ over" >&2
   exit 1
 fi
 
-if [ ! -d "$FF_DIR" ] || ! ls "$FF_DIR"/*/places.sqlite >/dev/null 2>&1; then
+if [ -z "$FF_DIR" ]; then
   cat >&2 <<'EOF'
-No Firefox profile found yet on this box. Launch Firefox once (it creates
-the default profile on first run), close it, then re-run restore.sh.
+No Firefox profile found yet on this box (checked ~/.config/mozilla/firefox
+and ~/.mozilla/firefox). Launch Firefox once (it creates the default
+profile on first run), close it, then re-run restore.sh.
 EOF
   exit 1
 fi

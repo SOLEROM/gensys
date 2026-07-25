@@ -69,6 +69,17 @@ echo "deb [arch=amd64 signed-by=/usr/share/keyrings/regolith-archive-keyring.gpg
 # deadsnakes (extra python versions, on-demand only — pyenv is the primary way, see 07_dev)
 sudo add-apt-repository -y ppa:deadsnakes/ppa
 
+# Mozilla Team PPA — noble's own `firefox` apt package is Canonical's
+# transitional snap-redirector (confirmed: apt-cache policy shows
+# `1:1snap1-0ubuntu5`, installing nothing but a snap install trigger), not a
+# real deb. Owner decision 2026-07-25: pin so `apt-get install firefox` in
+# step 3 below gets the PPA's real deb instead — snap Firefox's profile
+# lives under ~/snap/firefox/common/.mozilla/firefox (not ~/.mozilla/firefox),
+# which broke 15_firefox/restore.sh's assumptions.
+sudo add-apt-repository -y ppa:mozillateam/ppa
+printf 'Package: *\nPin: release o=LP-PPA-mozillateam\nPin-Priority: 1001\n\nPackage: firefox*\nPin: version 1:1snap*\nPin-Priority: -1\n' \
+  | sudo tee /etc/apt/preferences.d/mozilla-firefox
+
 # Cursor, Windsurf — verify current install method against noble; both ship
 # their own .deb/AppImage + apt-repo installers that change occasionally,
 # check https://cursor.com / https://windsurf.com for the current one-liner
@@ -78,6 +89,15 @@ sudo add-apt-repository -y ppa:deadsnakes/ppa
 curl -fsSL https://syncthing.net/release-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/syncthing-archive-keyring.gpg
 echo "deb [signed-by=/usr/share/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net syncthing stable" \
   | sudo tee /etc/apt/sources.list.d/syncthing.list >/dev/null
+
+# HashiCorp (vagrant) — noble dropped vagrant from its own archives (no
+# installation candidate in main/universe/multiverse, confirmed 2026-07-25;
+# virtualbox/libvirt from the same "dev runtime prerequisites" line still
+# resolve fine from Ubuntu's own repos). Needed only for the `vagrant`
+# package in step 5 below.
+curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(. /etc/os-release && echo $VERSION_CODENAME) main" \
+  | sudo tee /etc/apt/sources.list.d/hashicorp.list >/dev/null
 
 # Notion (fury.io) — verify current repo; notion-app's unofficial packaging changes hands occasionally.
 
@@ -98,7 +118,7 @@ sudo apt-get install -y \
   plocate ripgrep fd-find \
   curl wget rsync build-essential gnupg ca-certificates \
   software-properties-common net-tools nmap sqlite3 \
-  pandoc ffmpeg imagemagick graphviz gh yamllint yt-dlp
+  pandoc ffmpeg imagemagick graphviz gh yamllint yt-dlp python3-pip python3.12-venv
 sudo updatedb   # prime plocate's index so `locate` works right away
 ```
 
@@ -106,6 +126,22 @@ File-locating tools, per owner request (`plocate` replaces the focal-era
 `mlocate` — noble's `mlocate` package is just a transitional shim):
 `locate`/`updatedb` (plocate), `rg` (ripgrep), `fdfind` (fd-find, Debian
 renames the binary), plus `ag` (silversearcher-ag) and `fzf` already above.
+
+`python3-pip` — several personal projects under `/data/proj` (e.g.
+`08_ai-agent-tools`'s `cldlab`) run their own `python3` scripts straight
+against the system interpreter (no venv) and need `pip3` to install their
+`requirements.txt`. Not present on a bare noble install otherwise
+(confirmed missing 2026-07-25). Note noble's system Python is PEP 668
+"externally managed" — a project's own `pip3 install -r requirements.txt`
+still needs `--break-system-packages` (or a venv) even with `pip3` present;
+that's a per-project call, not something this layer decides.
+
+`python3.12-venv` — several `08_ai-agent-tools` units (`remdev`, `solseed`)
+create their own per-project venv on first run via `python3.12 -m venv`.
+Without this package that fails with `ensurepip is not available` (confirmed
+missing 2026-07-25, broke both units' `.venv22` recreation on a fresh noble
+install) — noble's `python3.12` doesn't bundle `ensurepip`/`venv` in the
+base interpreter package.
 
 Debug/monitoring and extra CLI tools (absorbed from the former `15-toolset`
 layer on 2026-07-24 — originally derived by diffing the
@@ -133,6 +169,10 @@ sudo apt-get install -y \
 ```bash
 # gpaste-2 is noble's package name for GPaste; eog backs the ee/img aliases
 # in 02_aliases; nnn/cscope (core CLI tier) back the nn/vv aliases there too.
+# firefox: with the mozillateam PPA pin from step 1 already in place, this
+# installs the real deb (not the snap-redirector) — confirm with
+# `apt-cache policy firefox` before relying on it. Its profile lives under
+# ~/.config/mozilla/firefox (XDG), not the legacy ~/.mozilla/firefox.
 sudo apt-get install -y \
   firefox thunderbird gimp vlc kdenlive obs-studio handbrake calibre \
   gthumb gwenview eog meld mkvtoolnix \
@@ -188,9 +228,29 @@ sudo apt-get install -y \
   cmake autoconf automake libtool \
   openjdk-17-jdk openjdk-21-jdk \
   nodejs npm \
-  qemu-kvm libvirt-daemon-system virtinst virt-manager vagrant virtualbox
+  qemu-kvm libvirt-daemon-system virtinst virt-manager vagrant
 ```
 (`lxd` has no apt package on noble — the snap in step 7 is the one install.)
+
+**VirtualBox — do NOT `apt-get install virtualbox`.** Noble's own multiverse
+package (7.0.16) fails to build its `vboxdrv` kernel module on newer kernels:
+`modpost` reports undefined `kvm_enable_virtualization`/`kvm_disable_
+virtualization`/`cr4_*` symbols — those kernels export the kvm-amd/kvm-intel
+symbols namespaced, and vboxdrv 7.0.16 doesn't import the namespace; fixed
+upstream only in VirtualBox 7.0.20+/7.1+, which noble doesn't ship. Confirmed
+failing 2026-07-25 on kernel `7.0.0-28-generic` (leaves `virtualbox`/
+`virtualbox-dkms`/`virtualbox-qt` half-configured in dpkg, blocking every
+later apt call until purged). Install Oracle's current `.deb` instead — same
+vendor-package pattern as Chrome/Discord/Obsidian below:
+
+```bash
+VBOX_VER=$(curl -fsSL https://download.virtualbox.org/virtualbox/LATEST.TXT)
+VBOX_DEB=$(curl -fsSL "https://download.virtualbox.org/virtualbox/${VBOX_VER}/" \
+  | grep -oE 'href="[^"]+noble[^"]*amd64\.deb"' | head -1 | sed 's/^href="//;s/"$//')
+curl -fL "https://download.virtualbox.org/virtualbox/${VBOX_VER}/${VBOX_DEB}" -o /tmp/virtualbox.deb
+sudo apt-get install -y /tmp/virtualbox.deb
+sudo usermod -aG vboxusers "$(id -un)"   # log out/in for the group to take effect
+```
 The full `docker-ce` stack is `09_docker`'s job (data-root relocation needs
 its own careful ordering — see that layer). `lib*-dev` set: add specific
 `-dev` packages as projects under `/proj` actually need them rather than

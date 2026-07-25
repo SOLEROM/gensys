@@ -99,6 +99,12 @@ if [ ! -f "$WALLPAPER" ]; then
 fi
 render_template Xresources ~/.config/regolith3/Xresources "WALLPAPER=$WALLPAPER"
 
+echo "==> input sources (English + Hebrew, Alt+Z toggle)"
+# gsd-keyboard (Regolith's Flashback session runs it) applies these live —
+# no re-login needed. No-op over a bare SSH shell with no session dbus.
+gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('xkb', 'il')]" || true
+gsettings set org.gnome.desktop.wm.keybindings switch-input-source "['<Alt>z']" || true
+
 echo "==> apply"
 regolith-look refresh || true
 # regolith-look only rereads ~/.config/regolith3/Xresources — merge the

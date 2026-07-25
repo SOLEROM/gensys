@@ -36,11 +36,18 @@ if [ "$DATA_ENCRYPTED" = yes ]; then
     exit 1
   fi
 
-  echo "==> /etc/crypttab (crypto_data)"
-  grep -qE "^crypto_data[[:space:]]" /etc/crypttab 2>/dev/null || \
-    echo "crypto_data UUID=$LUKS_UUID none luks" | sudo tee -a /etc/crypttab
-
-  if ! sudo cryptsetup status crypto_data >/dev/null 2>&1; then
+  # Same-disk reinstalls can arrive with /data already unlocked+mapped by
+  # the OS installer's own autoinstall/curtin config, under whatever mapper
+  # name it chose (not necessarily "crypto_data") — detect that by the
+  # decrypted filesystem UUID being visible at all, not by mapper name, so
+  # this doesn't plant a second crypttab line that prompts for the LUKS
+  # passphrase twice at every boot.
+  if [ -b "/dev/disk/by-uuid/$DATA_UUID" ]; then
+    echo "==> /data (UUID=$DATA_UUID) already unlocked — leaving existing crypttab entry as-is"
+  else
+    echo "==> /etc/crypttab (crypto_data)"
+    grep -qE "UUID=$LUKS_UUID" /etc/crypttab 2>/dev/null || \
+      echo "crypto_data UUID=$LUKS_UUID none luks" | sudo tee -a /etc/crypttab
     sudo cryptsetup luksOpen "/dev/disk/by-uuid/$LUKS_UUID" crypto_data
   fi
 else
@@ -57,9 +64,13 @@ if [ ! -b "/dev/disk/by-uuid/$DATA_UUID" ]; then
   exit 1
 fi
 sudo mkdir -p /data
-grep -qE "^UUID=${DATA_UUID}[[:space:]]" /etc/fstab || \
-  echo "UUID=$DATA_UUID /data ext4 defaults 0 2" | sudo tee -a /etc/fstab
-mountpoint -q /data || sudo mount /data
+if mountpoint -q /data; then
+  echo "==> /data already mounted — leaving existing fstab entry as-is"
+else
+  grep -qE "^UUID=${DATA_UUID}[[:space:]]" /etc/fstab || \
+    echo "UUID=$DATA_UUID /data ext4 defaults 0 2" | sudo tee -a /etc/fstab
+  sudo mount /data
+fi
 
 # No bind mounts here (the former /data/proj→/proj and soil-wiki binds) —
 # per owner decision they're a per-station, on-demand step done AFTER the
@@ -90,7 +101,17 @@ grep -qE "^${SWAP_PATH}[[:space:]]" /etc/fstab || \
 
 echo "==> verify"
 if [ "$DATA_ENCRYPTED" = yes ]; then
-  sudo cryptsetup status crypto_data | head -1
+  # Report status of whatever mapper actually backs $DATA_UUID — may be
+  # "crypto_data" (this layer set it up) or something else (already unlocked
+  # by the OS installer, see the already-unlocked case above). cryptsetup
+  # status wants the /dev/mapper/<name>, not the resolved /dev/dm-N node.
+  DATA_DM_DEV="$(readlink -f "/dev/disk/by-uuid/$DATA_UUID")"
+  DATA_MAPPER=""
+  for m in /dev/mapper/*; do
+    [ "$(basename "$m")" = control ] && continue
+    [ "$(readlink -f "$m")" = "$DATA_DM_DEV" ] && DATA_MAPPER="$(basename "$m")" && break
+  done
+  sudo cryptsetup status "${DATA_MAPPER:-crypto_data}" | head -1
 fi
 mount | grep ' /data '
 swapon --show

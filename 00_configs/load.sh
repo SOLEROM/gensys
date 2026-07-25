@@ -41,6 +41,14 @@ if [ -n "${GENSYS_CONFIG:-}" ]; then
     echo "Fix the path (available: $(ls "$GENSYS_CONFIG_DIR"/*.yaml "$GENSYS_CONFIG_DIR"/*/*.yaml 2>/dev/null | grep -v TEMPLATE.yaml | sed "s|^$GENSYS_REPO_ROOT/||" | tr '\n' ' '))" >&2
     return 1 2>/dev/null || exit 1
   fi
+  # Absolutize — several layers' apply.sh `cd` into a files/ subdir before
+  # later cfg() calls; a relative GENSYS_CONFIG (the documented usage, e.g.
+  # `GENSYS_CONFIG=00_configs/myDevX2.yaml make all`) would silently break
+  # cfg()'s `< "$CONFIG_FILE"` redirection after that cd — every cfg() call
+  # would then fall back to its default instead of erroring loudly, with no
+  # visible symptom whenever a real value happens to equal the default.
+  # Confirmed 2026-07-25: this actually happened (06_desktop-i3, 13_misc).
+  CONFIG_FILE="$(cd "$(dirname "$CONFIG_FILE")" && pwd)/$(basename "$CONFIG_FILE")"
 else
   # Station yamls live either flat (00_configs/<station>.yaml, tracked) or in
   # a per-station subfolder (00_configs/<station>/<station>.yaml, git-ignored
