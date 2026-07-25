@@ -1,0 +1,32 @@
+################################################################
+####################    git    #################################
+
+-- my aliases --
+gitstat		git status -s
+gitup [msg]	add-all + commit (msg or "auto update") + push
+gitall		status over every repo under $gitRoot
+gitsrc		print remote.origin.url of this repo
+gitorphen	list .md files/folders not linked from readme.md
+git.sol		restart ssh-agent + load github key
+git.keys	list loaded ssh keys (ssh-add -l)
+mygit		cd $gitRoot + load github key
+
+keys live in gensys/secrets/ssh/ (never committed) — if a
+push asks for a password, run git.sol first.
+
+-- recipes --
+
+merge from main on local
+========================
+git pull origin main
+
+
+update on main all branches
+===========================
+git fetch -a
+
+
+
+compare between local branch and remote one
+===========================================
+git difftool  <branch>:./<path>  <path>

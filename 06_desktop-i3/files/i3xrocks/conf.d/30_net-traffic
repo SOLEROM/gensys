@@ -1,0 +1,7 @@
+# Displays network load — gensys override of the packaged 30_net-traffic:
+# same blocklet, but command points at the user-side net-traffic-ssid
+# script (adds the connected SSID next to the wifi icon). $HOME is expanded
+# by the shell i3xrocks runs commands through.
+[net-traffic]
+interval=repeat
+command=$HOME/.config/regolith3/i3xrocks/scripts/net-traffic-ssid

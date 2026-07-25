@@ -1,0 +1,34 @@
+# open new wrksp with win+insert
+bindsym $mod+Insert exec --no-startup-id i3-msg workspace $(i3-msg -t get_workspaces | jq 'map(.num) | max | .+1')
+
+# jump betw windows in wrksp
+bindsym $alt+Tab focus right
+
+
+## add lock for win+l
+# bindsym $mod+l exec "gsettings set org.gnome.desktop.input-sources current 0 ; xtrlock "
+
+bindsym F1 workspace number $ws1
+bindsym F2 workspace number $ws2
+bindsym F3 workspace number $ws3
+bindsym F4 workspace number $ws4
+bindsym F5 workspace number $ws5
+bindsym F6 workspace number $ws6
+bindsym F7 workspace number $ws7
+bindsym F8 workspace number $ws8
+bindsym F9 workspace number $ws9
+bindsym F10 workspace number $ws10
+
+
+# mode to disable Fx moving between workspaces
+mode "disable-Fx-modes" {
+    # Bindings are disabled in this mode (no commands for F1-F10)
+    # Return to default mode
+    bindsym Ctrl+Escape mode "default" 
+    #bindsym Escape mode "default" 
+}
+bindsym Ctrl+Escape mode "disable-Fx-modes"
+
+
+
+

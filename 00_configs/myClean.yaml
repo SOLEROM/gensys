@@ -1,0 +1,75 @@
+# 00_configs/myClean.yaml — lean profile for a future fresh Ubuntu 24.04
+# install. Not tied to any existing station: only the general-purpose layers
+# and neutral repo defaults are set here, decided ahead of time so the file
+# is ready the day the box exists. Values that can only be discovered on the
+# actual hardware are left as <TODO ...> placeholders — fill them on the new
+# box before running, everything else can stay as-is.
+#
+# Use it with:
+#   export GENSYS_CONFIG=00_configs/myClean.yaml
+# (required — with more than one station yaml present, load.sh refuses to
+# guess. See 00_configs/README.md.)
+#
+# Personal workloads (08_ai-agent-tools, 12_services) are off, so their
+# agents:/services: sections are omitted entirely — if this station ever
+# takes them over, copy the commented skeletons from TEMPLATE.yaml.
+
+station:
+  name: myClean
+  username: "<TODO run: whoami>"
+  home: "<TODO run: echo $HOME>"
+  # Repo default — on the persistent /data partition (04_storage), survives
+  # reinstalls.
+  sysadmin_dir: /data/sysadmin
+  timezone: "<TODO run: timedatectl | grep 'Time zone'>"
+  tailscale_hostname: myClean          # MagicDNS name
+
+# General-purpose set: the system layers apply, the personal workloads
+# don't. "no" = skip; omitted or "yes" = apply; explicit `make <layer>`
+# bypasses.
+layers:
+  01_base: "yes"
+  04_storage: "yes"
+  05_shell: "yes"
+  06_desktop-i3: "yes"     # flip to "no" if the box ends up headless
+  07_dev: "yes"
+  08_ai-agent-tools: "no"  # personal agent servers stay on their own station
+  09_docker: "yes"
+  11_tailscale: "yes"
+  12_services: "no"        # personal network services / crons stay on their own station
+  13_misc: "yes"
+
+git:
+  name: "<TODO your git user.name>"
+  email: "<TODO your GitHub noreply email, or any email>"
+
+storage:
+  # "yes" = /data is a LUKS partition (crypttab unlock at boot); "no" skips
+  # every LUKS/crypttab step and ignores luks_uuid. Decide when partitioning
+  # the new disk.
+  data_encrypted: "<TODO yes|no>"
+  # From `blkid` on THE NEW disk — UUIDs are never reusable across machines.
+  luks_uuid: "<TODO run: blkid | grep crypto_LUKS — only if data_encrypted: yes>"
+  data_uuid: "<TODO run: blkid — the /data filesystem's UUID>"
+  swap_size: 16G
+  swap_encrypted: "yes"
+
+desktop:
+  wallpaper_n: 1
+  has_nvidia: "<TODO yes|no — run: lspci | grep -i nvidia>"
+  nvidia_driver: "550"                 # only read when has_nvidia: "yes"
+  cursor_theme: Adwaita
+  cursor_size: 24
+  mouse_accel_device: ""               # blank = no accel tweak
+  # From `xrandr --listmonitors` on the new box. Safe to leave as-is on a
+  # single-monitor setup — the scrLay* scripts no-op on absent outputs.
+  monitors:
+    laptop: "<TODO built-in panel, e.g. eDP-1>"
+    wide: "<TODO external output, e.g. DP-1>"
+    top: "<TODO second external output, e.g. HDMI-1>"
+
+dev:
+  rvm_install: "no"
+
+docker:
+  data_root: /data/dockerDATA

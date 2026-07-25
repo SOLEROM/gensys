@@ -1,0 +1,19 @@
+################################################################
+####################    wifi    ################################
+
+-- desktop way (NetworkManager) --
+nmcli device wifi list
+nmcli device wifi connect <SSID> password <PASS>
+nmcli connection show			saved profiles
+nmcli connection up/down <name>
+nmcli connection delete <name>		cleanup dup "Wired connection N"
+
+-- bare console fallback (no NM, e.g. recovery) --
+wpa_passphrase <SSID> <PASS> | sudo tee /etc/wpa_supplicant.conf
+sudo wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf
+sudo dhclient wlan0
+
+-- who am i --
+ip a				addresses
+iw dev				wifi ifaces
+publicIP			alias: my public IP

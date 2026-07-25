@@ -1,0 +1,12 @@
+{
+  "model": "sonnet",
+  "effortLevel": "xhigh",
+  "tui": "default",
+  "skipDangerousModePermissionPrompt": true,
+  "agentPushNotifEnabled": true,
+  "permissions": {
+    "allow": [
+      "Bash(sudo:*)"
+    ]
+  }
+}

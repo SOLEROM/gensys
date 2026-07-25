@@ -1,0 +1,15 @@
+[Unit]
+Description=cldLAB Claude Control Plane
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory={{CLDLAB_DIR}}
+ExecStart={{CLDLAB_DIR}}/run.sh --public --port {{CLDLAB_PORT}}
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

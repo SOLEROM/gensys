@@ -1,205 +1,30 @@
-# ==========================================================================
-# gensys .gitignore — safety-first: keep private/secret files off the remote
-# ==========================================================================
+# Anything under secrets/ must never be committed — see secrets/README.md.
+# Single tracked exception: the generic README (documents the convention,
+# names nothing station-specific). The real inventory (secrets/myReadme.md)
+# and the *.example key-name templates stay ignored with everything else —
+# they travel only with the manual working-tree copy, never via git.
+/secrets/*
+!/secrets/README.md
 
-# --------------------------------------------------------------------------
-# Secrets & credentials  (MOST IMPORTANT — never commit these)
-# --------------------------------------------------------------------------
-# Environment / dotenv files
-.env
-.env.*
-!.env.example
-!.env.sample
-!.env.template
-*.env
 
-# Generic secret files
-secrets.*
-*secret*
-*secrets*
-credentials
-credentials.*
-*.cred
-*.credentials
-auth.json
-.netrc
-.htpasswd
-
-# SSH / GPG / keys / certificates
-id_rsa
-id_dsa
-id_ecdsa
-id_ed25519
-*.pem
-*.key
-*.keystore
-*.jks
-*.p12
-*.pfx
-*.crt
-*.cer
-*.der
-*.ppk
-*.asc
-*.gpg
-*.pgp
-.ssh/
-known_hosts
-
-# Cloud / infra provider credentials
-.aws/
-.azure/
-.gcloud/
-gcloud-*.json
-service-account*.json
-*-service-account.json
-.terraform/
-*.tfstate
-*.tfstate.*
-*.tfvars
-!*.tfvars.example
-.terraformrc
-terraform.rc
-.vault-token
-kubeconfig
-*.kubeconfig
-.kube/config
-
-# Tokens / API keys dropped as files
-*.token
-.token
-apikey
-apikey.*
-*.apikey
-
-# --------------------------------------------------------------------------
-# Backups, dumps & archives  (may contain data or secrets)
-# --------------------------------------------------------------------------
-*.bak
-*.backup
-*.old
-*.orig
-*.swp.bak
-*.dump
-*.sql
-*.sqlite
-*.sqlite3
-*.db
-*.dump.gz
-*.tar
-*.tar.gz
-*.tgz
-*.zip
-*.gz
-*.7z
-*.rar
-
-# --------------------------------------------------------------------------
-# Logs & runtime
-# --------------------------------------------------------------------------
-*.log
-logs/
-*.pid
-*.seed
-*.pid.lock
-
-# --------------------------------------------------------------------------
-# OS-generated files
-# --------------------------------------------------------------------------
-# macOS
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-.AppleDouble
-.LSOverride
-Icon?
-
-# Windows
-Thumbs.db
-Thumbs.db:encryptable
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-*.lnk
-
-# Linux
-*~
-.directory
-.fuse_hidden*
-.nfs*
-
-# --------------------------------------------------------------------------
-# Editors & IDEs
-# --------------------------------------------------------------------------
-.vscode/
-!.vscode/extensions.json
-.idea/
-*.iml
-*.sublime-project
-*.sublime-workspace
-.project
-.classpath
-.settings/
-*.swp
-*.swo
-*~
-.\#*
-\#*\#
-
-# --------------------------------------------------------------------------
-# Temp / scratch
-# --------------------------------------------------------------------------
-tmp/
-temp/
-.tmp/
-.cache/
-*.tmp
-scratch/
-scratchpad/
-
-# --------------------------------------------------------------------------
-# Language / tooling artifacts (kept broad for a mixed repo)
-# --------------------------------------------------------------------------
-# Node
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-.npm/
-.yarn/
-
-# Python
+# Python bytecode from 15_firefox/export_bookmarks.py runs
 __pycache__/
-*.py[cod]
-*.egg-info/
-.venv/
-venv/
-env/
-.python-version
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
+*.pyc
 
-# Rust
-target/
+# Freeze-map snapshots from query/mapCurrentHost.sh — per-host audit data,
+# regenerable on any host by re-running the script; layer Origin sections
+# cite them by name but the data itself stays local. See query/README.md.
+/query/snapshots/
 
-# Go
-/bin/
-
-# Build output (common names)
-dist/
-build/
-out/
-
-# --------------------------------------------------------------------------
-# Local / personal overrides — put private stuff here and it stays local
-# --------------------------------------------------------------------------
-*.local
-*.private
-local/
-private/
-.local/
-secrets/
+# Exported Firefox bookmarks are personal browsing data — never upload.
+# backup.sh regenerates these locally; carry them to the new station the
+# same way as secrets/ (manual copy of the repo's working tree), not via
+# git. See 15_firefox/README.md.
+/15_firefox/bookmarks/*
+# This station's per-station folder — everything needed to define and rebuild
+# a new station from the myDevX1 dev box: the config yaml, its end-state
+# companion doc, and its host-specific alias file. All of it records the
+# personal layout (sync folders, agent services, remote hosts, project paths)
+# — like secrets/, the folder travels only with the manual working-tree copy,
+# never via git.
+/00_configs/myDevX1/

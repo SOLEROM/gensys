@@ -1,0 +1,15 @@
+################################################################
+####################    pdf    #################################
+
+reduce size:
+	gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/default -dNOPAUSE -dQUIET -dBATCH -sOutputFile=out.pdf in.pdf
+	(/screen = smallest, /ebook = mid, /prepress = best)
+
+merge:
+	gs -sDEVICE=pdfwrite -dNOPAUSE -dQUIET -dBATCH -sOutputFile=merged.pdf a.pdf b.pdf
+
+pages -> images:
+	pdftoppm -png -r 150 in.pdf pageImg
+
+images -> pdf:
+	convert *.png out.pdf		(imagemagick)

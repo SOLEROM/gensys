@@ -1,0 +1,41 @@
+################################################################
+####################    services / cron    #####################
+
+-- my user units (AI agents — details: h.ai) --
+systemctl --user status anvilon cldlab remdev resman solseed openclaw-gateway
+systemctl --user restart <unit>
+journalctl --user -u <unit> -e
+
+-- system units --
+sudo systemctl status mdplanner		root agent service
+sudo systemctl status docker tailscaled ollama
+
+-- network services (states set by gensys 12_services) --
+ssh		socket-activated: ssh.socket enabled,
+		ssh.service disabled = CORRECT, don't "fix"
+nfs-server	active; exports are ad-hoc:
+		edit /etc/exports, then sudo exportfs -ra
+dnsmasq		enabled-but-failed on stock conf = expected
+		(port 53 held by systemd-resolved); conf it
+		via /etc/dnsmasq.conf before caring
+hostapd		masked until /etc/hostapd/hostapd.conf exists,
+		then: sudo systemctl unmask --now hostapd
+openvpn		meta-unit active; tunnels = *.conf under
+		/etc/openvpn/{client,server}/ (keys via secrets/)
+sssd		enabled, needs /etc/sssd/ conf before it starts
+
+-- cron --
+crontab -l			mine (soil pipeline: soliAnal1)
+ls /etc/cron.d			system ones (stock ubuntu)
+
+-- syncthing --
+http://localhost:8384		web UI, pairing/folders live here
+systemctl --user status syncthing 2>/dev/null || syncthing
+
+-- printer --
+lpstat -p			CUPS; re-add via GNOME settings GUI
+
+-- generic spelunking --
+systemctl list-units --failed
+journalctl -e -u <unit>
+systemctl --user list-timers

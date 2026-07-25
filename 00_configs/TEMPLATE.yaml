@@ -1,0 +1,120 @@
+# 00_configs/TEMPLATE.yaml — station-agnostic skeleton. Copy to
+# 00_configs/<stationName>.yaml when building a new station, fill in every
+# <...> placeholder, then either:
+#   export GENSYS_CONFIG=00_configs/<stationName>.yaml
+# or pass it per-run:
+#   GENSYS_CONFIG=00_configs/<stationName>.yaml make all
+#
+# This file assumes NOTHING about any existing station: every value is
+# either a neutral repo default (safe to keep as-is) or a <placeholder>
+# (must be filled). Layers that carry one station's personal workloads
+# (08_ai-agent-tools, 12_services) default to "no" here — flip them to
+# "yes" only if this station takes those workloads over, and fill the
+# matching commented-out section at the bottom.
+#
+# Keep this file flat (scalars, or one level of nested maps) —
+# 00_configs/load.sh parses it with `yq e '.path.to.key'`. See
+# 00_configs/README.md for the full onboarding walkthrough.
+
+station:
+  name: "<stationName>"                # matches the filename, by convention
+  username: "<run: whoami>"
+  home: "<run: echo $HOME>"
+  # Where 05_shell/11_tailscale install the vendored 02_aliases/scripts/help
+  # pages ($sys in alias.bashrc). Repo default: /data/sysadmin — on the
+  # persistent /data partition so it survives reinstalls (04_storage must
+  # be applied first). If this station skips 04_storage, point it at a path
+  # that exists.
+  sysadmin_dir: /data/sysadmin
+  timezone: "<run: timedatectl | grep 'Time zone', e.g. Europe/Berlin>"
+  tailscale_hostname: "<stationName>"  # MagicDNS name — pick anything memorable
+
+# Which layers `make all` (and the CLAUDE_CONSUMER.md build agent) apply on
+# this station. "no" = skip; omitted or "yes" = apply. Explicitly running
+# `make <layer>` always bypasses this — naming a layer is the opt-in.
+# (10_embedded-hw/14_udev aren't listed: never part of `all`, explicit-run
+# only.)
+layers:
+  01_base: "yes"           # package baseline every later layer assumes — "no" only on a box provisioned another way
+  04_storage: "yes"        # "no" also means the default /data/sysadmin won't exist — move station.sysadmin_dir
+  05_shell: "yes"
+  06_desktop-i3: "yes"     # "no" for headless boxes
+  07_dev: "yes"
+  08_ai-agent-tools: "no"  # personal agent servers — see the commented `agents:` section below before enabling
+  09_docker: "yes"
+  11_tailscale: "yes"
+  12_services: "no"        # personal network services + crons — see the commented `services:` section below before enabling
+  13_misc: "yes"
+
+git:
+  name: "<your git user.name>"
+  email: "<your GitHub noreply email, or any email>"
+
+storage:
+  # "yes" = /data is a LUKS partition (crypttab unlock at boot). "no" = plain
+  # unencrypted /data partition — every LUKS/crypttab step is skipped and
+  # luks_uuid below is ignored.
+  data_encrypted: "<yes|no>"
+  # Run `blkid` on THIS disk — never reuse another station's UUIDs.
+  luks_uuid: "<run: blkid | grep crypto_LUKS — only if data_encrypted: yes>"
+  data_uuid: "<run: blkid — the /data filesystem's UUID>"
+  swap_size: 16G                       # repo default
+  swap_encrypted: "yes"
+
+desktop:
+  wallpaper_n: 1                       # pick from 06_desktop-i3/files/backgrounds/
+  has_nvidia: "<yes|no — run: lspci | grep -i nvidia>"
+  nvidia_driver: "550"                 # only read when has_nvidia: "yes"
+  cursor_theme: Adwaita                # repo default
+  cursor_size: 24                      # repo default
+  mouse_accel_device: ""               # xinput device name needing an accel tweak — leave blank for none
+  # Physical output names for the multiScreen scrLay* helpers — run
+  # `xrandr --listmonitors` on THIS box. Fine to leave as placeholders on a
+  # single-monitor station (the scripts just no-op on absent outputs).
+  monitors:
+    laptop: "<built-in panel, e.g. eDP-1>"
+    wide: "<external output, e.g. DP-1>"
+    top: "<second external output, e.g. HDMI-1>"
+
+dev:
+  rvm_install: "no"                    # only "yes" if a project still needs ruby-3.0.0
+
+docker:
+  data_root: /data/dockerDATA          # repo default — any mounted path works
+
+# --- Optional per-station blocks -------------------------------------------
+# Only fill these if this station takes over the matching personal workload
+# (and flip its `layers:` entry to "yes"). Absent keys = the workload is
+# simply not installed — 12_services/apply.sh skips each piece it finds no
+# config for.
+
+# agents:
+#   # Personal agent servers (08_ai-agent-tools). Each dirs.* is the absolute
+#   # WorkingDirectory of that service — DEFINING it is the opt-in; a unit
+#   # whose dir is unset/empty is skipped, not installed broken.
+#   dirs:
+#     anvilon:   "<abs path to the anvilon checkout>"
+#     cldlab:    "<abs path>"
+#     remdev:    "<abs path>"
+#     resman:    "<abs path>"
+#     solseed:   "<abs path>"
+#     mdplanner: "<abs path — system unit, runs at boot; see 08_ai-agent-tools/README.md>"
+#   ports:
+#     cldlab: 6002               # default
+#     openclaw_gateway: 18789    # default
+
+# services:
+#   # Soil-monitoring cron (myDevX1's workload). DEFINING soil_script is the
+#   # opt-in — without it no cron line is written on this station.
+#   soil_script: "<path to the soil script, e.g. /proj/soil/soliAnal1.sh>"
+#   soil_cron_schedule: "15 12 * * *"  # optional — this is the default
+#   printer_name: "<cosmetic label for the CUPS printer — not scripted>"
+
+# syncthing:
+#   # Folders to pre-configure in this station's Syncthing (device pairing
+#   # stays manual — see 12_services/README.md). Omit the block entirely if
+#   # nothing should be pre-configured.
+#   folders:
+#     - id: "<folder id>"
+#       label: "<label or empty>"
+#       path: "<absolute path>"

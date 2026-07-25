@@ -1,0 +1,20 @@
+################################################################
+####################    HELP WELCOME  ##########################
+################################################################
+        commands:
+h		this page
+hh		list all help pages
+
+h.alias		my aliases / jump shortcuts
+h.keys		key shortcuts (i3/Regolith + shell)
+h.git		git recipes + repo aliases
+h.docker	docker recipes (CE, data-root on /data)
+h.wifi		wifi from console + nmcli
+h.pdf		pdf tricks
+h.code		vscode notes
+h.dev		dev runtimes: uv / pyenv / nvm / rustup / java
+h.find		find things: locate / rg / fd / ag / fzf
+h.ai		claude code, usage monitors, agent servers, ollama
+h.ts		tailscale: reach this box from anywhere
+h.services	systemd units, cron, syncthing, net services
+h.gensys	rebuild/extend this machine (gensys repo)

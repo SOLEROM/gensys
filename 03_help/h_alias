@@ -1,0 +1,66 @@
+################################################################
+####################    my aliases    ##########################
+
+-- jumps --
+sys	jump to the sysadmin folder ($sys)  + title
+home	jump to $PROJROOT (~/proj)
+mygit	jump to $gitRoot + load github key
+ap	jump to ~/aproj
+
+-- shell / self --
+rr	re-source alias.bashrc
+vialias	edit alias.bashrc + re-source
+a	print ./readme.md (or README.md)
+aa	edit  ./readme.md
+cc	clear (keeps scrollback)
+xx	exit
+tit <txt>	set terminal title
+
+-- system --
+88	ping 8.8.8.8
+publicIP	show my public IP
+space	df summary: / + data disks
+mm	topmem: free -h + top mem hogs
+topCpu	5s sample of >70% cpu processes
+ss	screen off now
+nn	nnn file browser
+ee	eog image viewer
+
+-- clipboard / images --
+c2f <name>	save clipboard image to ./<name>.png
+img <file>	open image (eog)
+
+-- keyboard lang --
+keySetEng / keySetHeb	switch input source Eng/Heb
+
+-- git (details: h.git) --
+gitstat  gitall  gitup  gitsrc  git.sol  git.keys
+
+-- docker (details: h.docker) --
+dok_ps	sudo docker ps
+dok_ls	docker container ls -a
+d.killall	kill all running containers
+
+-- remote hosts (need secrets/hosts.env sourced) --
+sshh	ssh to embedded dev board
+vps1	ssh to the VPS
+tab1	ssh to tablet
+sshlp	ssh to laptop
+
+-- AI / agents (details: h.ai) --
+cld	claude --dangerously-skip-permissions
+cld_mon	claude-monitor
+clw_start / clw_stop	openclaw gateway on/off
+oll_start / oll_stop	ollama on/off
+
+-- programs --
+pp	taskStack (fzf multi-project task runner)
+oo	obsidian
+jupi	jupyter notebook on :8888 over ~/proj
+mini0 / mini1	minicom on /dev/ttyUSB0 / USB1 (myDevX1 only — station_aliases)
+tmux.tree	tmux sessions tree
+stip	set static IP by UUID (script)
+
+-- i3 (details: h.keys) --
+name <txt>	rename current i3 workspace
+newname <txt>	open next workspace, named

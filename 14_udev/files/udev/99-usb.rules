@@ -1,0 +1,8 @@
+# Rule for SanDisk USB device
+# The old RUN+="{{HOME}}/sys/test.sh" hook is dropped: udev RUN executes as
+# ROOT, and pointing it at a user-writable $HOME path is a root-escalation
+# hole (any local writer of that path runs code as root on plug-in). The
+# script didn't exist on the source host anyway. If a hook is ever wanted,
+# ship it root-owned under /usr/local/lib/ and point RUN there.
+SUBSYSTEM=="usb", ATTR{idVendor}=="0781", ATTR{idProduct}=="5595", ATTR{bcdDevice}=="0100", MODE="0666", SYMLINK+="myusbdevice"
+

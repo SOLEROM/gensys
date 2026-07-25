@@ -1,0 +1,41 @@
+################################################################
+####################    gensys (this machine as code)    #######
+## the repo that BUILT this box. every tweak worth keeping
+## goes back into it, or the next reinstall loses it.
+
+-- where --
+the gensys repo clone (alias.bashrc sources secrets from it;
+default home: under /data/proj — run: locate gensys/install.sh)
+
+-- rebuild / re-apply --
+./install.sh			fresh-box entry (make deps -> agent or make)
+make all			every default layer, in order
+make 09_docker			one layer only
+GENSYS_CONFIG=00_configs/<st>.yaml make all	other station
+make 14_udev / make 10_embedded-hw	opt-in layers (never in all)
+
+-- layers --
+01_base apt/snap BOM		04_storage /data mount+swap
+05_shell zsh+aliases+help	06_desktop-i3 regolith
+07_dev runtimes			08_ai-agent-tools claude+agents
+09_docker CE+data-root		11_tailscale
+12_services net/cron/sync	13_misc fonts/git-id/ssh-pattern
+14_udev, 10_embedded-hw		on-demand only
+
+-- per-station knobs --
+00_configs/<station>.yaml		UUIDs, ports, paths, tz, wallpaper
+00_configs/TEMPLATE.yaml		start a new station from this
+
+-- audit what's installed NOW --
+query/mapCurrentHost.sh		freeze-map snapshot of the host
+				(diff two dated runs = what changed)
+
+-- secrets (never in git) --
+secrets/README.md		ssh keys, hosts.env, api keys, cameras
+secrets/hosts.env		backs sshh/vps1/tab1/sshlp aliases
+
+-- editing THESE help pages --
+pages live in gensys/03_help/, installed by 05_shell to $sys/help.
+new topic = new h_<topic> file + line in welcome + h.<topic>
+alias in 02_aliases/alias.bashrc. edit in the REPO, then re-apply
+(make 05_shell), or the next rebuild reverts your edit.

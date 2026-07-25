@@ -1,0 +1,19 @@
+[Unit]
+Description=solSeed plan.md authoring & review workbench
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory={{SOLSEED_DIR}}
+# Pick the per-host venv without pulling in dev deps (--dev would). run.sh
+# creates it on first start if missing. The listen port comes from the .port
+# file at the repo root (falls back to ~/.solseed.yaml, then 8788).
+Environment=SOLSEED_VENV=.venv22
+ExecStart={{SOLSEED_DIR}}/run.sh --public
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

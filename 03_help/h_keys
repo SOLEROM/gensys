@@ -1,0 +1,30 @@
+################################################################################
+####################### my keys shortcuts   	################################
+
+-- i3 / Regolith (custom, from config.d/myConfs) --
+F1..F10		jump straight to workspace 1..10
+Win+Insert	open next-numbered workspace
+Alt+Tab		focus window to the right
+Ctrl+Escape	toggle "disable-Fx" mode (F-keys stop switching
+		workspaces; Ctrl+Escape again to re-enable)
+
+-- Regolith stock (most used) --
+Win+Shift+?	show all keybindings (ilia overlay)
+Win+Enter	terminal
+Win+Space	app launcher
+Win+Shift+q	close window
+Win+f		fullscreen
+Win+Shift+r	restart i3 (reload config)
+
+-- from the shell --
+name <txt>	rename current i3 workspace -> "N: N.txt"
+newname <txt>	open new next workspace, already named
+tit <txt>	set terminal window/tab title
+
+-- misc --
+a	print readme
+aa	edit readme
+rr	realias
+oo	obsidian
+pp	taskStack (fzf multi-project task runner)
+keySetEng / keySetHeb	Eng/Heb input toggle

@@ -1,0 +1,4 @@
+# SSH over Session Manager (pattern only — commented out on the source host;
+# actual keys/hosts restored from secrets/ssh/, never from git history)
+##host i-* mi-*
+##    ProxyCommand sh -c "aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'"

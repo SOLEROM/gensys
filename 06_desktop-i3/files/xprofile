@@ -1,0 +1,26 @@
+export XCURSOR_SIZE="{{CURSOR_SIZE}}"
+export XCURSOR_THEME="{{CURSOR_THEME}}"
+
+# NVIDIA + compositor smoothness (picom on dual monitor, one rotated).
+# USLEEP: GL thread sleeps instead of spinning while waiting on the compositor.
+# MaxFramesAllowed=1: cap prerendered frames -> lower input latency.
+# SYNC_TO_VBLANK=1: GL apps respect vsync (picom is one of them).
+export __GL_YIELD="USLEEP"
+export __GL_MaxFramesAllowed=1
+export __GL_SYNC_TO_VBLANK=1
+
+# Mouse accel tweak: use adaptive accel profile (flat at max speed felt like
+# the cursor stuck to the top edge) for the device named below (see
+# desktop.mouse_accel_device in this station's 00_configs yaml — blank/absent
+# device names simply loop over nothing, self-guarding on other hardware).
+# Some devices share their name across multiple HID interfaces; only one has
+# the property, so loop and skip devices without it.
+_accel_device="{{MOUSE_ACCEL_DEVICE}}"
+if [ -n "$_accel_device" ]; then
+    for _id in $(xinput list --id-only 2>/dev/null); do
+        [ "$(xinput list --name-only "$_id" 2>/dev/null)" = "$_accel_device" ] || continue
+        xinput list-props "$_id" 2>/dev/null | grep -q "libinput Accel Profile Enabled" || continue
+        xinput set-prop "$_id" "libinput Accel Profile Enabled" 1 0
+    done
+fi
+unset _id _accel_device

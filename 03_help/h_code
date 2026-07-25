@@ -1,0 +1,16 @@
+################################################################
+####################    vscode / cursor    #####################
+
+add Pylance extra path
+	ctrl + ','
+	type 	"extrapaths"
+	chose  	"add element"
+	add path
+
+-- extensions (lists tracked in gensys/07_dev/files/) --
+dump current:
+	code --list-extensions   > vscode-extensions.txt
+	cursor --list-extensions > cursor-extensions.txt
+restore on a fresh box:
+	xargs -n1 code   --install-extension < vscode-extensions.txt
+	xargs -n1 cursor --install-extension < cursor-extensions.txt

@@ -1,0 +1,15 @@
+[Unit]
+Description=Resman resource manager
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory={{RESMAN_DIR}}
+ExecStart={{RESMAN_DIR}}/run.sh --vname .venv-ubuntu20 --public
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

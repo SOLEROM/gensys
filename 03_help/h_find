@@ -1,0 +1,31 @@
+################################################################
+####################    find things    #########################
+## all installed by gensys 01_base (plocate, ripgrep, fd-find,
+## silversearcher-ag, fzf, bat, ncdu, tree)
+
+-- by file NAME --
+locate <name>			instant, whole disk (plocate)
+sudo updatedb			refresh locate index
+fdfind <name>			fd: fast find in current tree
+fdfind -e py <name>		by extension
+find . -name '*.foo' -mmin -60	stock find: changed last hour
+
+-- by file CONTENT --
+rg <pattern>			ripgrep, respects .gitignore
+rg -i --hidden <pattern>	case-insens, incl hidden
+rg -g '*.py' <pattern>		only in *.py
+ag <pattern>			the silver searcher (same idea)
+grep -rn <pattern> .		stock, everywhere
+
+-- interactive --
+fzf				fuzzy pick from stdin
+vi $(fzf)			open a fuzzily-found file
+history | fzf			fish for an old command
+
+-- look at what you found --
+batcat <file>			cat with syntax highlight (bat)
+tree -L 2			dir overview
+
+-- disk space --
+ncdu /data			interactive du
+space				alias: df summary

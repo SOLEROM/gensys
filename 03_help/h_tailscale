@@ -1,0 +1,33 @@
+################################################################
+####################    tailscale    ###########################
+## the ONE remote-access path (TeamViewer/AnyDesk/VNC dropped).
+## 4-node tailnet: this station, vps1, two mobiles.
+
+-- daily --
+tailscale status		who's on the tailnet, this node too
+tailscale ip -4			my 100.x.y.z address
+$sys/01_scripts/tailscale/list-online.sh	table of online nodes
+$sys/01_scripts/tailscale/check-tailscale.sh	full local audit
+		(--client on nodes that don't run the SSH server)
+
+-- reach THIS box from vps1 / phone --
+tailscale ssh <user>@<hostname>		no keys, no password
+ssh <user>@<hostname>			plain ssh via MagicDNS
+any service too: <hostname>:6002 (cldlab), :18789 (openclaw)
+
+-- (re)join the tailnet --
+sudo systemctl enable --now tailscaled
+sudo tailscale up --ssh --hostname=<pick-a-name>
+	interactive browser login; --ssh = accept tailscale SSH in
+
+-- admin console (login.tailscale.com/admin) --
+machines -> ... -> Disable key expiry	so a server never drops off
+DNS -> MagicDNS on			once per tailnet
+Access controls -> "ssh" block		who may SSH where
+	"action": "check"  = periodic browser re-verify (default)
+	"action": "accept" = non-interactive (for cron from vps1)
+
+-- troubleshooting --
+tailscale netcheck
+sudo systemctl status tailscaled
+journalctl -u tailscaled -e

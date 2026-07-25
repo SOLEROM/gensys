@@ -1,0 +1,36 @@
+################################################################
+####################    dev runtimes    ########################
+## installed by gensys 07_dev (java/jupyter come from 01_base). no conda/mamba —
+## python is uv first, pyenv only for odd interpreter versions.
+
+-- python: uv (primary) --
+uv venv				make .venv here
+uv pip install <pkg>		into active venv
+uv run <script.py>		run in project env
+uv tool install <cli>		global CLI (e.g. claude-monitor)
+uv python list			interpreters uv can use
+
+-- python: pyenv (secondary, on-demand) --
+pyenv install -l | grep 3.	what's available
+pyenv install 3.x.y
+pyenv local 3.x.y		pin for this dir
+
+-- node: nvm --
+nvm ls				installed versions
+nvm install --lts
+nvm alias default lts/*		pin default
+nvm use <ver>
+
+-- rust --
+rustup update
+rustup component list --installed	(clippy, rustfmt, rust-analyzer)
+cargo new <name> / cargo build / cargo clippy
+
+-- java --
+sudo update-alternatives --config java	pick 17 / 21
+
+-- ruby (only if RVM_INSTALL=yes was chosen) --
+rvm list ; rvm use ruby-3.0.0 --default
+
+-- jupyter (apt family, not pip) --
+jupi		alias: notebook on :8888, no token, over ~/proj

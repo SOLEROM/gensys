@@ -1,0 +1,33 @@
+################################################################
+####################    docker    ##############################
+
+this host: Docker CE from docker.com apt repo (NOT snap),
+data-root relocated off / — set by gensys 09_docker
+(default /data/dockerDATA, knob: docker.data_root in configs).
+
+-- my aliases --
+dok_ps		sudo docker ps
+dok_ls		docker container ls -a
+d.killall	kill all running containers
+
+-- where is the data --
+docker info | grep "Docker Root Dir"
+sudo du -sh <that root dir>			how big is it
+
+-- daemon conf (data-root lives here) --
+sudo vi /etc/docker/daemon.json
+sudo systemctl restart docker
+
+-- cleanup --
+docker system df				what eats space
+docker system prune -a -f --volumes		nuke unused (careful: volumes!)
+
+-- compose templates (survive reinstalls, on /proj) --
+ls /data/proj/myGits/forge/composers/	8 reusable compose patterns (/proj works only after the optional bind mount)
+
+-- gpu / cuda --
+nvidia-ctk + docker run --gpus all ...
+https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/
+
+-- no sudo needed after --
+groups | grep docker		(re-login after usermod -aG docker)

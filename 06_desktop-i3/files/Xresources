@@ -1,0 +1,11 @@
+!regolith.wallpaper.file: /usr/share/backgrounds/warty-final-ubuntu.png
+!regolith.lockscreen.wallpaper.file: /usr/share/backgrounds/warty-final-ubuntu.png
+! BUILD: the WALLPAPER token below is replaced by the build agent with the
+! absolute path of the chosen background, i.e. ~/.local/share/backgrounds/imgBg_<N>.jpg
+regolith.wallpaper.file: {{WALLPAPER}}
+regolith.lockscreen.wallpaper.file: {{WALLPAPER}}
+
+! click the bar clock -> popup calendar. Consumed by the stock
+! /usr/share/i3xrocks/scripts/time blocklet (xrescat i3xrocks.action.time),
+! so no packaged file needs editing. Needs zenity (installed by this layer).
+i3xrocks.action.time: zenity --calendar

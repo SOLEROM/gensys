@@ -1,0 +1,110 @@
+#################################
+# User picom config — tuned for NVIDIA 580 + dual monitor + i3-regolith
+# Overrides /etc/regolith/picom/config (regolith launcher prefers this path)
+#################################
+
+# --- Backend ---
+backend = "glx";
+
+# --- GLX tuning for NVIDIA ---
+glx-no-stencil = true;
+glx-no-rebind-pixmap = true;
+# On modern NVIDIA (470+) sync-fence ADDS latency rather than fixing tearing.
+# The original regolith default sets this true "for some users on nvidia" — that
+# advice is from the nouveau/legacy-blob era. Turn it off.
+xrender-sync-fence = false;
+glx-copy-from-front = false;
+use-damage = false;
+
+# --- VSync ---
+vsync = true;
+
+# --- Unredirect ---
+# unredir-if-possible = true causes a flicker every time a fullscreen window
+# gains/loses focus on NVIDIA. Disable.
+unredir-if-possible = false;
+
+# --- Shadows (kept, but with same exclusions as system config) ---
+shadow = true;
+shadow-radius = 7;
+shadow-offset-x = -5;
+shadow-offset-y = -5;
+shadow-opacity = 0.8;
+shadow-exclude = [
+    "! name~=''",
+    "name = 'Notification'",
+    "name = 'Plank'",
+    "name = 'Docky'",
+    "name = 'Kupfer'",
+    "name = 'xfce4-notifyd'",
+    "name *= 'compton'",
+    "name *= 'picom'",
+    "name *= 'cpt_frame_window'",
+    "name *= 'cpt_frame_xcb_window'",
+    "name *= 'wrapper-2.0'",
+    "class_g = 'Conky'",
+    "class_g = 'Kupfer'",
+    "class_g = 'Synapse'",
+    "class_g ?= 'Notify-osd'",
+    "class_g ?= 'Cairo-dock'",
+    "_GTK_FRAME_EXTENTS@:c",
+    "_NET_WM_STATE@:32a *= '_NET_WM_STATE_HIDDEN'"
+];
+shadow-ignore-shaped = false;
+crop-shadow-to-monitor = true;
+
+# --- Opacity / dimming ---
+inactive-opacity = 1;
+active-opacity = 1;
+frame-opacity = 1;
+inactive-opacity-override = false;
+# inactive-dim forces a full redraw on every focus change — disable it on
+# NVIDIA + rotated monitor where redraws are expensive.
+inactive-dim = 0;
+inactive-dim-fixed = true;
+blur-background-fixed = false;
+blur-background-exclude = [
+    "window_type = 'dock'",
+    "window_type = 'desktop'"
+];
+
+# --- Fading ---
+fading = true;
+fade-delta = 5;
+fade-in-step = 0.04;
+fade-out-step = 0.04;
+fade-exclude = [
+    "name *= 'ilia'"
+];
+
+# --- Misc ---
+mark-wmwin-focused = true;
+mark-ovredir-focused = true;
+use-ewmh-active-win = true;
+detect-rounded-corners = true;
+detect-client-opacity = true;
+dbe = false;
+focus-exclude = [ ];
+detect-transient = true;
+detect-client-leader = true;
+
+wintypes:
+{
+    tooltip = {
+        fade = true;
+        shadow = false;
+        opacity = 0.85;
+        focus = true;
+    };
+    dock = { shadow = true; }
+    dnd = { shadow = false; }
+    popup_menu = {
+        opacity = 1.0;
+        shadow = false;
+        fade = false;
+    }
+    dropdown_menu = {
+        opacity = 1.0;
+        fade = false;
+    }
+};

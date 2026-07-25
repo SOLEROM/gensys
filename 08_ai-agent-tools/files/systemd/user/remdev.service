@@ -1,0 +1,21 @@
+[Unit]
+Description=remdev dev-station control center
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory={{REMDEV_DIR}}
+# Pick the per-host venv without pulling in dev deps. run.sh creates it on
+# first start if missing. The listen port comes from the .port file at the
+# repo root (falls back to REMDEV_PORT, then 6005).
+# The app has NO authentication: it binds localhost unless the operator
+# opted in with `install.sh --public`.
+Environment=REMDEV_VENV=.venv22
+ExecStart={{REMDEV_DIR}}/run.sh --public
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

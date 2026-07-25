@@ -1,0 +1,20 @@
+[Unit]
+Description=Anvilon v2 — multi-agent mission server
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory={{ANVILON_DIR}}
+# run.sh serve execs the prebuilt release binary (./run.sh build first).
+# The binary reads the repo-root .port file for its port; ANVILON_BIND
+# overrides it. Without --public it binds loopback (v2 has no auth layer) —
+# reach it over an ssh tunnel or VPN. install.sh fills the trailing args
+# slot with --public only when you pass --public to it.
+ExecStart={{ANVILON_DIR}}/run.sh serve --public
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

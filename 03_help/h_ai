@@ -1,0 +1,37 @@
+################################################################
+####################    AI tools / agents    ###################
+## installed by gensys 08_ai-agent-tools (+ make deps for claude)
+
+-- claude code --
+cld		claude --dangerously-skip-permissions
+claude		normal, permission-prompting run
+claude --version
+
+-- usage / quota monitors --
+cld_mon		claude-monitor (uv tool)
+<gensys>/08_ai-agent-tools/files/clds/usage.sh
+		session + weekly quota bars, burn rate
+		flags: --json, --wakeup (pings a session awake first)
+		needs: prior claude login, bun, python3
+
+-- sibling CLIs --
+codex		OpenAI Codex CLI (npm -g @openai/codex)
+gemini		google gemini CLI
+gh copilot	via gh extension
+
+-- personal agent servers (systemd --user) --
+systemctl --user status anvilon cldlab remdev resman solseed openclaw-gateway
+cldlab		localhost:6002
+openclaw	localhost:18789 (gateway)
+clw_start / clw_stop	restart/stop openclaw gateway
+sudo systemctl status mdplanner		(the one system unit)
+code lives on /data/proj — survives reinstalls; units are
+rendered from gensys configs (agents.dirs / agents.ports).
+
+-- ollama (docker image or service) --
+oll_start / oll_stop	sudo systemctl restart/stop ollama
+
+-- security reminder --
+several agent servers run --public / no auth by design choice
+made for the OLD network — re-decide before exposing on a new one
+(see gensys/08_ai-agent-tools/README.md).
