@@ -37,7 +37,7 @@
 #   ./install.sh          # make deps, then print the hand-off options + rule list
 #   make deps             # bootstrap only: base apt tooling + Claude Code
 #   make list             # print every rule (same list install.sh shows)
-#   make all              # deps + every layer, in order (10_embedded-hw/14_udev excluded)
+#   make all              # deps + every layer, in order (10_embedded-hw/14_udev/17_gdrive excluded)
 #   make 04_storage       # one layer at a time
 #   DOCKER_DATA_ROOT=/mnt/bkData/docker make 09_docker
 #   GENSYS_CONFIG=00_configs/myDevX2.yaml make all   # build a different station
@@ -56,7 +56,7 @@ SHELL := /bin/bash
 LAYERS := 01_base 04_storage 05_shell 06_desktop-i3 07_dev 08_ai-agent-tools \
           09_docker 11_tailscale 12_services 13_misc
 
-.PHONY: all deps list $(LAYERS) 14_udev 10_embedded-hw
+.PHONY: all deps list $(LAYERS) 14_udev 10_embedded-hw 17_gdrive
 
 # `all` walks LAYERS in order, honoring the station config's layers.<name>
 # toggles (default "yes"). Not prerequisites anymore — a skip decision needs
@@ -72,7 +72,7 @@ all: deps
 	    echo "=== skipping $$l (layers.$$l: \"no\" in $$CONFIG_FILE) ==="
 	  fi
 	done
-	echo "=== make all done (10_embedded-hw + 14_udev excluded by design — run them explicitly if ever wanted) ==="
+	echo "=== make all done (10_embedded-hw + 14_udev + 17_gdrive excluded by design — run them explicitly if ever wanted) ==="
 
 # every layer rule is the same shape: run that layer's apply.sh.
 # 14_udev shares the shape but is intentionally NOT in LAYERS/`all` —
@@ -167,6 +167,7 @@ list:
 	for l in $(LAYERS); do echo "  $$l"; done
 	echo "  14_udev          optional, excluded from 'all' — device-specific udev rules (see its README)"
 	echo "  10_embedded-hw   optional, excluded from 'all' — reference-only, no apply.sh yet (see its README)"
+	echo "  17_gdrive        optional, excluded from 'all' — reference-only, no apply.sh yet (see its README)"
 
 # Intentionally NOT a dependency of `all` — optional, on-demand only.
 # No apply.sh exists yet either (documentation-only layer, see its README);
@@ -175,3 +176,10 @@ list:
 	@cat 10_embedded-hw/README.md
 	@echo
 	@echo "=== 10_embedded-hw is reference-only — no apply.sh exists yet. ==="
+
+# Same treatment as 10_embedded-hw — optional, on-demand only, no apply.sh
+# yet (rclone + Google Drive OAuth remote, see its README).
+17_gdrive:
+	@cat 17_gdrive/README.md
+	@echo
+	@echo "=== 17_gdrive is reference-only — no apply.sh exists yet. ==="

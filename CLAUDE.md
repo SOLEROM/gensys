@@ -29,5 +29,8 @@ Maintenance conventions (details in [`README.md`](./README.md)):
 - `secrets/`, the per-station folder `00_configs/myDevX1/` (config yaml,
   end-state doc, host aliases), and `15_firefox/bookmarks/` are git-ignored
   by design — they travel as working-tree copies, never as commits.
-- `10_embedded-hw`, `14_udev`, and `16_vps` are reference/on-demand only:
-  not in `make all`, never applied or asked about by default.
+- `10_embedded-hw`, `14_udev`, `16_vps`, and `17_gdrive` are reference/
+  on-demand only: not in `make all`, never applied or asked about by
+  default. `17_gdrive` sets up an `rclone` Google Drive remote (OAuth) —
+  only do it when the owner explicitly asks for Drive sync on a station,
+  same treatment as the others.
