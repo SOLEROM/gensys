@@ -15,6 +15,9 @@ Reproduce the Regolith 3 desktop environment with the author's customizations:
   focuses right; a `disable-Fx-modes` mode toggled with `Ctrl+Escape`.
 - **NVIDIA-tuned picom** compositor (GLX, vsync, flicker fixes for a rotated
   monitor).
+- **Focus follows mouse**: hovering a window focuses it, set via the
+  `wm.gaps.focus_follows_mouse` X resource in `files/Xresources` (Regolith's
+  packaged default is `no` if this resource is unset).
 - **Status-bar tweaks** (i3xrocks): connected Wi-Fi SSID shown next to the
   net icon; clicking the clock pops a zenity calendar. Mined from the old
   station's `ubu20/00RegolithI3/barChanges/` notes, re-implemented as
@@ -230,14 +233,19 @@ pgrep -a picom                   # NVIDIA boxes: picom with the user config
                                  # (non-NVIDIA: no user picom config by design)
 xrdb -query | grep -i wallpaper  # wallpaper path resolved
 xrdb -query | grep action.time   # → zenity --calendar
+xrdb -query | grep focus_follows_mouse  # → wm.gaps.focus_follows_mouse: yes
+# (i3-msg -t get_config only dumps the top-level file with its `include`
+# lines, not expanded partials, so it won't show the resolved directive —
+# test behavior directly instead: hover between windows, see below)
 ls ~/.config/regolith3/i3xrocks/conf.d/   # all packaged blocklets + our 30_net-traffic
 gsettings get org.gnome.desktop.input-sources sources          # → [('xkb', 'us'), ('xkb', 'il')]
 gsettings get org.gnome.desktop.wm.keybindings switch-input-source  # → ['<Alt>z']
 ```
 
 Functionally: press `F1`–`F10` (workspaces switch), `Win+Insert` (new workspace
-appears), `Alt+Tab` (focus moves right), and confirm no flicker when toggling a
-fullscreen window.
+appears), `Alt+Tab` (focus moves right), moving the mouse over another window
+on the same workspace focuses it without clicking, and confirm no flicker when
+toggling a fullscreen window.
 
 ---
 

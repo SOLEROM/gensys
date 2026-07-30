@@ -9,3 +9,8 @@ regolith.lockscreen.wallpaper.file: {{WALLPAPER}}
 ! /usr/share/i3xrocks/scripts/time blocklet (xrescat i3xrocks.action.time),
 ! so no packaged file needs editing. Needs zenity (installed by this layer).
 i3xrocks.action.time: zenity --calendar
+
+! hover a window to focus it (i3 focus_follows_mouse), read via
+! set_from_resource in /usr/share/regolith/i3/config.d/40_default-style —
+! packaged default is "no" if this resource is unset.
+wm.gaps.focus_follows_mouse: yes
