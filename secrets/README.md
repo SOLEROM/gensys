@@ -1,40 +1,72 @@
 # secrets/ — git-ignored transfer staging, never committed
 
-**Everything under `secrets/` except this README is excluded by the repo's
-`.gitignore`** (`/secrets/*` with a single `!/secrets/README.md` exception).
-Credentials that must move host-to-host — env files holding passwords or
-API tokens, private SSH keys — are staged here for **manual** transfer:
-encrypted USB, `scp` over an already-trusted link, a password manager.
-This is *not* a mechanism for a fresh host to auto-provision itself from
-git — nothing in this folder ever reaches git, so a plain `git clone`
-contains only this file.
+**Everything in this folder except this README is excluded by the repo's
+`.gitignore`** (`/secrets/*` + `!/secrets/README.md`). This is where
+credentials that must move host-to-host get staged for manual transfer
+(encrypted USB, `scp` over the existing Tailscale net, a password manager) —
+it is **not** a mechanism for a fresh host to auto-provision itself from git,
+since none of this ever reaches git.
 
-## Conventions
+## Layout
 
-- **Sourced conditionally.** Consumers elsewhere in the repo (shell
-  aliases, cron scripts) `source` a file from here *if it exists* and
-  silently skip it otherwise — every layer applies cleanly with this
-  folder empty; the matching features just stay dormant until the file
-  is restored.
-- **`.example` templates.** Each real env file has a matching `*.example`
-  beside it (key names and usage comments, no values) to refill from if
-  the real file was lost rather than transferred. The templates are
-  git-ignored too — they travel only with the working-tree copy, like
-  everything else here.
-- **Same relative paths.** Restoring on a new host means landing the files
-  back at the same paths under wherever this repo is cloned. SSH keys are
-  consumed **in place** from `secrets/ssh/` (the `ssh-add` aliases in
-  `02_aliases/alias.bashrc` point straight at them — nothing copies them to
-  `~/.ssh`); keep them `600`. Only copy a key into `~/.ssh` if some tool
-  demands it, with the same `600` permissions.
-- **Rotate on transfer.** Any credential that ever sat in cleartext
-  somewhere less controlled than this folder is rotated at transfer time,
-  not merely relocated.
+| Path | Contents |
+|---|---|
+| `hosts.env` | `VPS1_*`, `TAB1_*`, `SSHLP_*`, `VOXL_PASS`, `GITLAB_*` — sourced by `aliases/alias.bashrc` and `aliases/scripts/gitScripts/newGitlabRepoCreate.sh` if present, silently skipped if not |
+| `cameras/soil.env` | `TAPO_USER`/`TAPO_PASS` for the soil-monitoring cron pipeline — sourced by `/proj/soil/soliAnal1.sh` |
+| `ssh/` | Private keys: `gitKey_private_github` (+ `.pub`), `tripRepo_` (+ `.pub`), `hIT_id_rsa` (+ `.pub`), `github-recovery-codes.txt` |
+| `api-keys/` | `GPT_API` (OpenAI key, used by `claude-monitor`/misc tooling) |
 
-## Station-specific inventory
+## Restore on the new host
 
-The actual per-station details — which credential files exist, what
-consumes each one, exact restore commands, and rotation status — live in
-**`myReadme.md`** in this same folder. That file is git-ignored on purpose
-(it names real hosts, keys, and accounts) and travels with the manual copy
-of the working tree, alongside the secrets it documents.
+```bash
+mkdir -p ~/.ssh
+cp secrets/ssh/gitKey_private_github ~/.ssh/   && chmod 600 ~/.ssh/gitKey_private_github
+cp secrets/ssh/tripRepo_             ~/.ssh/   && chmod 600 ~/.ssh/tripRepo_
+cp secrets/ssh/hIT_id_rsa            ~/.ssh/   && chmod 600 ~/.ssh/hIT_id_rsa
+ssh-add ~/.ssh/gitKey_private_github ~/.ssh/tripRepo_ ~/.ssh/hIT_id_rsa
+```
+
+`hosts.env` and `cameras/soil.env` just need to land back at these same
+relative paths under wherever this repo is cloned — nothing else to do,
+the alias/cron scripts `source` them conditionally.
+
+## Rotation — do before/at time of transfer, not after
+
+- **`VPS1_PASS` (VPS root password)** — was sitting in cleartext in
+  `/data/sysadmin/00_bashrc/solov.bashrc` for an unknown amount of time
+  before this move. Rotate it on the VPS itself; moving it here doesn't
+  undo that prior exposure.
+- **`TAB1_PASS`, `SSHLP_PASS`** — same "was cleartext in a dotfile"
+  reasoning, lower blast radius (local LAN devices, not internet-facing).
+- **`TAPO_PASS` (soil camera)** — trivial to rotate via the Tapo app; low
+  stakes (LAN-only camera) but cheap to fix.
+- **`GITLAB_API_TOKEN`** — local GitLab instance (`192.168.2.3`), regenerate
+  from its web UI; also LAN-only.
+- **`VOXL_PASS`** — not actually secret; `oelinux123` is that dev-board
+  family's well-known default OE-Linux password, kept here only for the
+  one-source-of-secrets convention, not because it's sensitive.
+
+> **Note on this session specifically**: while building this folder, two
+> debug commands meant to *verify* extraction instead printed the VPS/tab1/
+> sshlp passwords and the Tapo camera password in plaintext into this
+> conversation's tool output, before the redaction bugs were caught and
+> fixed. Treat all four as burned regardless of how low-stakes some of them
+> are — rotate them, don't just relocate them.
+
+## Dropped, not migrated (reviewed, decided not worth carrying forward)
+
+- `/data/sysadmin/srvGIts/erez20/cred/octoprint` — a third party's (Erez's)
+  OctoPrint credential for their own 3D printer; unrelated to this station,
+  not moved. Revisit only if that integration turns out to still matter.
+- `/data/fll/.keys/fllKey` (+ the `git.fll` alias that used it) — a
+  kids'/FLL-robotics side project's deploy key, unrelated to the dev-station
+  rebuild this repo targets. Already persists via `/data/fll` on the reused
+  disk regardless; not part of `gensys`.
+- `alias.bashrc`'s `git.lab` referenced `$sys/10_gitKeys/gitKey_private_gitlab`
+  — no such file was found on this host (dead reference, likely stale from
+  an earlier setup). Not fabricated; dropped from the merged alias file.
+
+## `~/.aws/`
+
+Left alone — standard AWS CLI convention, not this repo's concern. Re-run
+`aws configure` or restore from your own password manager on the new host.

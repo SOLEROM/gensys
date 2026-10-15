@@ -199,7 +199,12 @@ alias oo='obsidian'
 alias git.solerom="ssh-add {{GENSYS_REPO_ROOT}}/secrets/ssh/gitKey_private_github 1>/dev/null 2>/dev/null"
 alias git.trip="ssh-add {{GENSYS_REPO_ROOT}}/secrets/ssh/tripRepo_ 1>/dev/null 2>/dev/null"
 alias git.keys="ssh-add -l"
-alias git.sol="killall ssh-agent; git.solerom ; ssh-add -l"
+## no killall/restart here: SSH_AUTH_SOCK is served by the desktop's
+## socket-activated gcr-ssh-agent (always up), not a literal "ssh-agent"
+## process — killall only ever matched an unrelated legacy child gnome-
+## keyring-daemon spawns for a socket nothing uses, so it did nothing but
+## print "ssh-agent: no process found" when that child wasn't up.
+alias git.sol="git.solerom"
 
 alias gitstat="git status -s"
 alias gitall="$bashScripts/gitScripts/statusOnAll.sh $gitRoot"
