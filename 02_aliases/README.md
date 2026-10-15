@@ -14,7 +14,8 @@ debating between two host conventions.
   scripts/
     tit.sh  titZSH.sh  wrsp_name.sh  wrsp_addNewNamed.sh   # terminal-title / i3-workspace-rename+create helpers
     multiScreen/   # scrLay0/1/2.sh + thisName.sh: move i3 workspaces to a named physical monitor output
-    gitScripts/   # multi-repo git helpers (statusOnAll, orphan-md finder, tree w/ .gitignore)
+    gitScripts/   # multi-repo git helpers (statusOnAll, orphan-md finder, tree w/ .gitignore,
+                  #   git-brief.sh + git-brief.prompt.md: claude-written commit msg for ./)
     tmux/lisTree.sh
     maps/mapls.sh
     shell/setStaticIPbyUUID.sh

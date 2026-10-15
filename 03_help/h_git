@@ -7,6 +7,8 @@ gitup [msg]	add-all + commit (msg or "auto update") + push
 gitall		status over every repo under $gitRoot
 gitsrc		print remote.origin.url of this repo
 gitorphen	list .md files/folders not linked from readme.md
+git.brief	commit msg for ./ changes: subject + up to 4 bullets (claude)
+		  gitup "$(git.brief)"  -> commit + push with it
 git.sol		restart ssh-agent + load github key
 git.keys	list loaded ssh keys (ssh-add -l)
 mygit		cd $gitRoot + load github key

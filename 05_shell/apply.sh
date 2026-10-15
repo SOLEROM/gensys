@@ -106,6 +106,7 @@ for f in "$ALIASES/scripts/multiScreen/"*.sh; do
 done
 cp "$ALIASES/scripts/shell/setStaticIPbyUUID.sh" "$SYSADMIN_DIR/01_scripts/shell/setStaticIPbyUUID.sh"
 cp "$ALIASES/scripts/gitScripts/"*.sh    "$SYSADMIN_DIR/01_scripts/gitScripts/"
+cp "$ALIASES/scripts/gitScripts/"*.prompt.md "$SYSADMIN_DIR/01_scripts/gitScripts/"  # git-brief.sh reads its prompt from beside itself
 cp "$ALIASES/scripts/tmux/lisTree.sh"    "$SYSADMIN_DIR/01_scripts/tmux/lisTree.sh"
 cp "$ALIASES/scripts/maps/mapls.sh"      "$SYSADMIN_DIR/01_scripts/maps/mapls.sh"
 
